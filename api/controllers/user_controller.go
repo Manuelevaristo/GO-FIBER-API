@@ -23,12 +23,12 @@ func CreateUser(c *fiber.Ctx) error {
 	var user models.User
 	defer cancel()
 
-	//validate the request body
+	//validar o corpo da solicitação
 	if err := c.BodyParser(&user); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(responses.UserResponse{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
 
-	//use the validator library to validate required fields
+	//use a biblioteca do validador para validar os campos obrigatórios
 	if validationErr := validate.Struct(&user); validationErr != nil {
 		return c.Status(http.StatusBadRequest).JSON(responses.UserResponse{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": validationErr.Error()}})
 	}
@@ -73,12 +73,10 @@ func EditAUser(c *fiber.Ctx) error {
 
 	objId, _ := primitive.ObjectIDFromHex(userId)
 
-	//validate the request body
 	if err := c.BodyParser(&user); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(responses.UserResponse{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
 
-	//use the validator library to validate required fields
 	if validationErr := validate.Struct(&user); validationErr != nil {
 		return c.Status(http.StatusBadRequest).JSON(responses.UserResponse{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": validationErr.Error()}})
 	}
@@ -91,7 +89,7 @@ func EditAUser(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
 
-	//get updated user details
+	//obter detalhes atualizados do usuário
 	var updatedUser models.User
 	if result.MatchedCount == 1 {
 		err := userCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&updatedUser)
@@ -139,7 +137,7 @@ func GetAllUsers(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
 
-	//reading from the db in an optimal way
+	//lendo do banco de dados de uma maneira ideal
 	defer results.Close(ctx)
 	for results.Next(ctx) {
 		var singleUser models.User

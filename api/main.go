@@ -2,7 +2,7 @@ package main
 
 import (
 	"api/configs"
-	"api/routes" //add this
+	"api/routes"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -10,11 +10,11 @@ import (
 func main() {
 	app := fiber.New()
 
-	//run database
+	//executar banco de dados
 	configs.ConnectDB()
 
-	//routes
-	routes.UserRoute(app) //add this
+	//rotas
+	routes.UserRoute(app)
 
 	app.Listen(":8080")
 }
