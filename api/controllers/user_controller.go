@@ -15,9 +15,20 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+/*
+	Criar userCollection e validate, variáveis ​​para criar uma coleção
+
+e validar modelos usando a biblioteca github.com/go-playground/validator/v10
+*/
 var userCollection *mongo.Collection = configs.GetCollection(configs.DB, "users")
 var validate = validator.New()
 
+/*
+	Cria uma função CreateUser que retorne um arquivo error. Dentro da função,
+
+primeiro definimos um timeout de 10 segundos ao inserir o usuário no documento,
+validando tanto o corpo da solicitação quanto o campo obrigatório usando a biblioteca do validador.
+*/
 func CreateUser(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	var user models.User
@@ -33,6 +44,8 @@ func CreateUser(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(responses.UserResponse{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": validationErr.Error()}})
 	}
 
+	/* 	primeiro cria uma variar newUser, inserimos usando a função userCollection.InsertOne e verifica se há erros, se houver.
+	   	Depois, retorna a resposta correta se a inserção foi bem-sucedida. */
 	newUser := models.User{
 		Id:    primitive.NewObjectID(),
 		Nome:  user.Nome,
@@ -48,6 +61,15 @@ func CreateUser(c *fiber.Ctx) error {
 	return c.Status(http.StatusCreated).JSON(responses.UserResponse{Status: http.StatusCreated, Message: "successo", Data: &fiber.Map{"data": result}})
 }
 
+/*
+	Crie uma função GetAUser que retorne um arquivo error. Dentro da função,
+
+primeiro definimos um timeout de 10 segundos ao encontrar um usuário no documento,
+uma variável userId para obter o id do usuário a partir do parâmetro URL e uma variavel user.
+Converte o userId de uma string em um primitive.ObjectID, um tipo BSON que o MongoDB usa.
+Em segundo lugar, busca o usuário usando o userCollection.FindOne, passa o objId como filtro
+e usa o Decode método attribute para obter o objeto correspondente. Por fim, retorna a resposta decodificada.
+*/
 func GetAUser(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	userId := c.Params("userId")
@@ -65,6 +87,7 @@ func GetAUser(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(responses.UserResponse{Status: http.StatusOK, Message: "successo", Data: &fiber.Map{"data": user}})
 }
 
+// cria a função para editar usuário
 func EditAUser(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	userId := c.Params("userId")
@@ -102,6 +125,7 @@ func EditAUser(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": updatedUser}})
 }
 
+// Cria a função para Deletar usuário
 func DeleteAUser(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	userId := c.Params("userId")
